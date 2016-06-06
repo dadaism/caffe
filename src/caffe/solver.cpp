@@ -197,14 +197,14 @@ void Solver<Dtype>::Step(int iters) {
   int average_loss = this->param_.average_loss();
   losses_.clear();
   smoothed_loss_ = 0;
-
+  //printf("Enter step()\n"); getchar();
   while (iter_ < stop_iter) {
     // zero-init the params
     net_->ClearParamDiffs();
     if (param_.test_interval() && iter_ % param_.test_interval() == 0
         && (iter_ > 0 || param_.test_initialization())
         && Caffe::root_solver()) {
-      TestAll();
+      //TestAll();
       if (requested_early_exit_) {
         // Break out of the while loop because stop was requested while testing.
         break;
@@ -219,11 +219,14 @@ void Solver<Dtype>::Step(int iters) {
     // accumulate the loss and gradient
     Dtype loss = 0;
     for (int i = 0; i < param_.iter_size(); ++i) {
+      //printf("Finish %d/%d iters\n", i, param_.iter_size());
       loss += net_->ForwardBackward();
     }
+    //printf("Finish ForwardBackward()\n"); getchar();
     loss /= param_.iter_size();
     // average the loss across iterations for smoothed reporting
     UpdateSmoothedLoss(loss, start_iter, average_loss);
+    //printf("Finish UpdateSmoothedLoss()\n");
     if (display) {
       LOG_IF(INFO, Caffe::root_solver()) << "Iteration " << iter_
           << ", loss = " << smoothed_loss_;
@@ -250,7 +253,9 @@ void Solver<Dtype>::Step(int iters) {
     for (int i = 0; i < callbacks_.size(); ++i) {
       callbacks_[i]->on_gradients_ready();
     }
+    //printf("Finish on_gradients_ready()\n");
     ApplyUpdate();
+    //printf("Finish ApplyUpdate()\n");
 
     // Increment the internal iter_ counter -- its value should always indicate
     // the number of times the weights have been updated.
@@ -404,6 +409,7 @@ void Solver<Dtype>::Test(const int test_net_id) {
     LOG(INFO) << "    Test net output #" << i << ": " << output_name << " = "
               << mean_score << loss_msg_stream.str();
   }
+  printf("Finish Solver::Test()\n");
 }
 
 template <typename Dtype>

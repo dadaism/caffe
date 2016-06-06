@@ -44,14 +44,16 @@ inline void CaffeFreeHost(void* ptr, bool use_cuda) {
  */
 class SyncedMemory {
  public:
-  SyncedMemory()
+/*  SyncedMemory()
       : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(0), head_(UNINITIALIZED),
         own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false),
         gpu_device_(-1) {}
   explicit SyncedMemory(size_t size)
       : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(size), head_(UNINITIALIZED),
         own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false),
-        gpu_device_(-1) {}
+        gpu_device_(-1) {}*/
+  SyncedMemory();
+  explicit SyncedMemory(size_t size);
   ~SyncedMemory();
   const void* cpu_data();
   void set_cpu_data(void* data);
@@ -62,6 +64,9 @@ class SyncedMemory {
   enum SyncedHead { UNINITIALIZED, HEAD_AT_CPU, HEAD_AT_GPU, SYNCED };
   SyncedHead head() { return head_; }
   size_t size() { return size_; }
+
+  bool own_gpu_data() { return own_gpu_data_; }
+  void reset_gpu_data();
 
 #ifndef CPU_ONLY
   void async_gpu_push(const cudaStream_t& stream);

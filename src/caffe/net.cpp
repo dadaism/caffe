@@ -19,6 +19,10 @@
 
 #include "caffe/test/test_caffe_main.hpp"
 
+#include "caffe/vdnn.hpp"
+
+extern DeviceMemoryManager dmm;
+
 namespace caffe {
 
 template <typename Dtype>
@@ -537,10 +541,13 @@ Dtype Net<Dtype>::ForwardFromTo(int start, int end) {
   CHECK_LT(end, layers_.size());
   Dtype loss = 0;
   for (int i = start; i <= end; ++i) {
+    //printf("\n\nForward: Start processing layer %d\n", i);
+    dmm.resetHitTable();
     // LOG(ERROR) << "Forwarding " << layer_names_[i];
     Dtype layer_loss = layers_[i]->Forward(bottom_vecs_[i], top_vecs_[i]);
     loss += layer_loss;
     if (debug_info_) { ForwardDebugInfo(i); }
+    //printf("\n\nForward: End processing layer %d\n", i);
   }
   return loss;
 }
@@ -583,9 +590,12 @@ void Net<Dtype>::BackwardFromTo(int start, int end) {
   CHECK_LT(start, layers_.size());
   for (int i = start; i >= end; --i) {
     if (layer_need_backward_[i]) {
+      //printf("\n\nBackward: Start processing layer %d\n", i);
+      dmm.resetHitTable();
       layers_[i]->Backward(
           top_vecs_[i], bottom_need_backward_[i], bottom_vecs_[i]);
       if (debug_info_) { BackwardDebugInfo(i); }
+      //printf("Backward: End processing layer %d\n\n", i);
     }
   }
 }
@@ -915,6 +925,7 @@ void Net<Dtype>::ToHDF5(const string& filename, bool write_diff) const {
 template <typename Dtype>
 void Net<Dtype>::Update() {
   for (int i = 0; i < learnable_params_.size(); ++i) {
+    dmm.resetHitTable();
     learnable_params_[i]->Update();
   }
 }

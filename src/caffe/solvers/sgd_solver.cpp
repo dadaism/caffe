@@ -6,6 +6,10 @@
 #include "caffe/util/io.hpp"
 #include "caffe/util/upgrade_proto.hpp"
 
+#include "caffe/vdnn.hpp"
+
+extern DeviceMemoryManager dmm;
+
 namespace caffe {
 
 // Return the current learning rate. The currently implemented learning rate
@@ -108,8 +112,11 @@ void SGDSolver<Dtype>::ApplyUpdate() {
   ClipGradients();
   for (int param_id = 0; param_id < this->net_->learnable_params().size();
        ++param_id) {
+    dmm.resetHitTable();
     Normalize(param_id);
+    dmm.resetHitTable();
     Regularize(param_id);
+    dmm.resetHitTable();
     ComputeUpdateValue(param_id, rate);
   }
   this->net_->Update();

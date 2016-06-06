@@ -74,33 +74,33 @@ void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
 
 template <typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
-#ifndef CPU_ONLY
+/*#ifndef CPU_ONLY
   cudaStream_t stream;
   if (Caffe::mode() == Caffe::GPU) {
     CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
   }
-#endif
+#endif*/
 
   try {
     while (!must_stop()) {
       Batch<Dtype>* batch = prefetch_free_.pop();
       load_batch(batch);
-#ifndef CPU_ONLY
+/*#ifndef CPU_ONLY
       if (Caffe::mode() == Caffe::GPU) {
         batch->data_.data().get()->async_gpu_push(stream);
         CUDA_CHECK(cudaStreamSynchronize(stream));
       }
-#endif
+#endif*/
       prefetch_full_.push(batch);
     }
   } catch (boost::thread_interrupted&) {
     // Interrupted exception is expected on shutdown
   }
-#ifndef CPU_ONLY
+/*#ifndef CPU_ONLY
   if (Caffe::mode() == Caffe::GPU) {
     CUDA_CHECK(cudaStreamDestroy(stream));
   }
-#endif
+#endif*/
 }
 
 template <typename Dtype>
